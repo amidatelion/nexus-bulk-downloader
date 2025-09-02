@@ -3,22 +3,24 @@ package nexus
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
 type File struct {
-	FileID   int    `json:"file_id"`
-	Name     string `json:"name"`
-	Category string `json:"category_name"`
-	FileName string `json:"file_name"`
+	Name       string `json:"name"`
+	FileID     int    `json:"file_id"`
+	Category   string `json:"category_name"`
+	FileName   string `json:"file_name"`
 }
 
-type apiResponse struct {
+type filesResponse struct {
 	Files []File `json:"files"`
+	// file_updates is ignored
 }
 
-func FetchFiles(apiKey, gameSlug, modID string) ([]File, error) {
-	url := fmt.Sprintf("https://api.nexusmods.com/v1/games/%s/mods/%s/files.json", gameSlug, modID)
+func FetchFiles(apiKey, game, modID string) ([]File, error) {
+	url := fmt.Sprintf("https://api.nexusmods.com/v1/games/%s/mods/%s/files.json", game, modID)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -35,12 +37,22 @@ func FetchFiles(apiKey, gameSlug, modID string) ([]File, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API request failed with status: %s", resp.Status)
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("API request failed: %s\n%s", resp.Status, string(body))
 	}
 
-	var parsed apiResponse
-	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
+	var data filesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
-	return parsed.Files, nil
+
+	// 🔹 Filter: only include MAIN files
+	mainFiles := []File{}
+	for _, f := range data.Files {
+		if f.Category == "MAIN" {
+			mainFiles = append(mainFiles, f)
+		}
+	}
+
+	return mainFiles, nil
 }

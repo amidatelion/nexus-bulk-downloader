@@ -6,41 +6,63 @@ import (
 
 	"github.com/manifoldco/promptui"
 
-	"nexusmods-cli/internal/config"
-	"nexusmods-cli/internal/nexus"
+	"nexusmods/internal/config"
+	"nexusmods/internal/nexus"
 )
 
 func main() {
-	// Load config.json
-	cfg, err := config.Load("config.json")
+	cfg, err := config.LoadConfig("config.json")
 	if err != nil {
-		log.Fatalf("Error loading config: %v", err)
+		log.Fatalf("failed to load config: %v", err)
 	}
 
-	// Interactive mod selection
-	modIDs := cfg.ModOptions()
-	prompt := promptui.Select{
-		Label: "Select Mod",
-		Items: modIDs,
-	}
+	fmt.Println("Loaded config. API key set?", cfg.Config.Apikey != "")
 
-	_, result, err := prompt.Run()
-	if err != nil {
-		log.Fatalf("Prompt failed: %v", err)
-	}
+	for game, mods := range cfg.Games {
+		fmt.Printf("\n=== Game: %s ===\n", game)
+		for modID, modName := range mods {
+			fmt.Printf("\n--- Mod %s (%s) ---\n", modID, modName)
 
-	modID := config.ExtractModID(result)
+			files, err := nexus.FetchFiles(cfg.Config.Apikey, game, modID)
+			if err != nil {
+				log.Printf("error fetching files for mod %s: %v", modID, err)
+				continue
+			}
 
-	// Query API
-	files, err := nexus.FetchFiles(cfg.APIKey, modID)
-	if err != nil {
-		log.Fatalf("Error fetching files: %v", err)
-	}
+			if len(files) == 0 {
+				fmt.Println("No MAIN files found.")
+				continue
+			}
 
-	// Display results
-	fmt.Println("\nAvailable Files:")
-	for _, f := range files {
-		fmt.Printf("- [%d] %s [%s]\n", f.FileID, f.Name, f.Category)
-		fmt.Printf("  File: %s\n\n", f.FileName)
+			if len(files) == 1 {
+				f := files[0]
+				fmt.Printf("Auto-selected: %s [%s] (id=%d)\n", f.Name, f.FileName, f.FileID)
+				continue
+			}
+
+			// Multiple MAIN files, use promptUI to let user pick
+			templates := &promptui.SelectTemplates{
+				Label:    "{{ . }}",
+				Active:   "▶ {{ .Name | cyan }} ({{ .FileName | red }})",
+				Inactive: "  {{ .Name | cyan }} ({{ .FileName | red }})",
+				Selected: "✔ {{ .Name | green }}",
+			}
+
+			prompt := promptui.Select{
+				Label:     fmt.Sprintf("Choose MAIN file for mod %s", modName),
+				Items:     files,
+				Templates: templates,
+				Size:      5,
+			}
+
+			i, _, err := prompt.Run()
+			if err != nil {
+				log.Printf("prompt failed: %v", err)
+				continue
+			}
+
+			selected := files[i]
+			fmt.Printf("Selected: %s [%s] (id=%d)\n", selected.Name, selected.FileName, selected.FileID)
+		}
 	}
 }
