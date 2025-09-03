@@ -18,14 +18,14 @@ Note the `autoextract` and `downloaddir` values. These can be overriden either i
 > Currently only supports API keys from premium accounts. Support for free accounts is forthcoming, but due to Nexus' policies, only premium accounts can download from the API directly, free accounts must go through the website.
 
 ## Usage
-
-
-`nexus-bulk-downloader download [flags]`
+```
+nexus-bulk-downloader download [flags]
 
 Flags:
   -x, --autoextract          Override autoextract setting
   -d, --downloaddir string   Override download directory
   -h, --help                 help for download
+```
 
 Reads the config.json file and downloads all the mod files for each entry to the current directory. 
 
