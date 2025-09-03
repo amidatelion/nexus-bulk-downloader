@@ -1,5 +1,11 @@
 # nexus-bulk-downloader
 
+Designed as a generic bulk downloader/extractor even though config.json.example is currently set up for MechWarrior 5: Mercenaries. 
+
+To download mods from other games, add the game domain as a block under `games` in the config and your mods *by ID* into the *keys* underneath. Currently the values of the key-value pairs function as comments for clarity, since json doesn't support comments.
+
+There are vague, distant plans for an extension to make generating these blocks easier. Emphasis on distant.
+
 ## Directions
 
 Copy config.json.example to config.json
