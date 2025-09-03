@@ -1,0 +1,42 @@
+{
+  "config": {
+    "apikey": "ASDF1234",
+    "autoextract": false,
+    "downloaddir": "."
+  },
+  "games": {
+    "mechwarrior5mercenaries": {
+      "444": "XenoPax Optimize",
+      "685": "XenoPax Art Optimize",
+      "680": "Stacked Crates",
+      "955": "Exotic Inner Sphere Mechs (YAML)",
+      "537": "Mod Options",
+      "946": "Pilot Promotion",
+      "886": "FrankenMechs",
+      "100": "RemoveJumpShipAnim",
+      "485": "Repair Bays",
+      "412": "Advanced Zoom",
+      "150": "Star Map Mouse Over",
+      "297": "Laser Visual Tweak",
+      "649": "Yet Another Special Variant",
+      "51": "Unlock Hidden Color Schemes",
+      "459": "Yet Another Mechlab",
+      "165": "Yet Another Weapon",
+      "241": "Yet Another Weapon Clan",
+      "592": "Yet Another Equipment Collection",
+      "816": "Yet Another Mechlab Mechs",
+      "760": "Yet Another Clan Mech",
+      "964": "Yet Another IS Mech",
+      "966": "Yet Another Legendary Mech",
+      "783": "Yet Another Weapon Quirks",
+      "168": "MW5 Mod Compatibility Pack",
+      "493": "Lore-based Mech Variants YAML-Edition",
+      "1031": "Yet Another Gah Dang Mech",
+      "1030": "Yet Another Campaign Hero Mech",
+      "441": "vonBiomes",
+      "585": "vonHUD",
+      "565": "Camo Spec 2.0",
+      "612": "Co-op Ping"
+    }
+  }
+}

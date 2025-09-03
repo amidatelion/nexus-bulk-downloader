@@ -1,0 +1,4 @@
+config.json
+*.zip
+nexus-bulk-downloader
+downloads/
