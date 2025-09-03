@@ -7,6 +7,8 @@ import (
 	"github.com/manifoldco/promptui"
 
 	"nexus-bulk-downloader/internal/config"
+
+	"nexus-bulk-downloader/internal/extractor"
 	"nexus-bulk-downloader/internal/nexus"
 )
 
@@ -16,14 +18,14 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	fmt.Println("Loaded config. API key set?", cfg.Config.Apikey != "")
+	fmt.Println("Loaded config. API key set?", cfg.Config.APIKey != "")
 
 	for game, mods := range cfg.Games {
 		fmt.Printf("\n=== Game: %s ===\n", game)
 		for modID, modName := range mods {
 			fmt.Printf("\n--- Mod %s (%s) ---\n", modID, modName)
 
-			files, err := nexus.FetchFiles(cfg.Config.Apikey, game, modID)
+			files, err := nexus.FetchFiles(cfg.Config.APIKey, game, modID)
 			if err != nil {
 				log.Printf("error fetching files for mod %s: %v", modID, err)
 				continue
@@ -34,10 +36,34 @@ func main() {
 				continue
 			}
 
+			// Single MAIN file
 			if len(files) == 1 {
 				f := files[0]
 				fmt.Printf("Auto-selected: %s [%s] (id=%d)\n", f.Name, f.FileName, f.FileID)
+
+				uri, err := nexus.GetDownloadLink(cfg.Config.APIKey, game, modID, f.FileID)
+				if err != nil {
+					log.Printf("error getting download link: %v", err)
+					continue
+				}
+
+				path, err := nexus.DownloadFile(uri, cfg.Config.DownloadDir)
+				if err != nil {
+					log.Printf("download failed: %v", err)
+					continue
+				}
+				fmt.Printf("Downloaded to %s\n", path)
+
+				if cfg.Config.AutoExtract {
+					fmt.Printf("Extracting %s...\n", path)
+					if err := extractor.ExtractZip(path, cfg.Config.DownloadDir); err != nil {
+						log.Printf("failed to extract %s: %v", path, err)
+					} else {
+						fmt.Printf("Extracted to %s\n", cfg.Config.DownloadDir)
+					}
+				}
 				continue
+
 			}
 
 			// Multiple MAIN files, use promptUI to let user pick
@@ -63,6 +89,29 @@ func main() {
 
 			selected := files[i]
 			fmt.Printf("Selected: %s [%s] (id=%d)\n", selected.Name, selected.FileName, selected.FileID)
+
+			uri, err := nexus.GetDownloadLink(cfg.Config.APIKey, game, modID, selected.FileID)
+			if err != nil {
+				log.Printf("error getting download link: %v", err)
+				continue
+			}
+
+			path, err := nexus.DownloadFile(uri, cfg.Config.DownloadDir)
+			if err != nil {
+				log.Printf("download failed: %v", err)
+				continue
+			}
+			fmt.Printf("Downloaded to %s\n", path)
+
+			if cfg.Config.AutoExtract {
+				fmt.Printf("Extracting %s...\n", path)
+				if err := extractor.ExtractZip(path, cfg.Config.DownloadDir); err != nil {
+					log.Printf("failed to extract %s: %v", path, err)
+				} else {
+					fmt.Printf("Extracted to %s\n", cfg.Config.DownloadDir)
+				}
+			}
+
 		}
 	}
 }

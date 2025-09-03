@@ -1,7 +1,8 @@
 {
   "config": {
     "apikey": "ASDF1234",
-    "autoextract": false
+    "autoextract": false,
+    "downloaddir": "./downloads"
   },
   "games": {
     "mechwarrior5mercenaries": {
