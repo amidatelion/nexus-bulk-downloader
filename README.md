@@ -8,6 +8,9 @@ Add your [Nexus Mods API key](https://next.nexusmods.com/settings/api-keys) to t
 
 Note the `autoextract` and `downloaddir` values. These can be overriden either in the config or on the command line.
 
+> [!IMPORTANT]
+> Currently only supports API keys from premium accounts. Support for free accounts is forthcoming, but due to Nexus' policies, only premium accounts can download from the API directly, free accounts must go through the website.
+
 ## Usage
 
 
